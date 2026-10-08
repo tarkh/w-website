@@ -1,0 +1,66 @@
+# The W website → GitHub Pages.
+#
+# The site is this repository (landing, download, fonts, images) built around the
+# documentation of W, which lives in the W repository and is rendered by W's own
+# generator — so the build checks out both. W's side is taken at `main`: in the
+# public repository that branch moves only by release snapshots, so it is always
+# the last release — the docs users actually have.
+#
+# Triggers:
+#   push to main        — a change to the site itself
+#   workflow_dispatch   — W's scripts/publish.sh starts it after every release,
+#                         since a release changes the docs; or by hand
+# There is no nightly run: the download page asks GitHub for the current image
+# in the reader's browser, so the nightly ISO needs no rebuild here.
+name: site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time; a newer build waits instead of being cut off mid-deploy.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/checkout@v7
+        with:
+          repository: tarkh/w
+          ref: main
+          path: w-linux
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      # The version Arch ships, which renders W's committed offline copy.
+      - run: pip install markdown-it-py==4.2.0
+
+      - name: Build
+        run: W_SRC=w-linux python build.py out
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v5

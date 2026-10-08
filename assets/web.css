@@ -1,0 +1,150 @@
+/* W website — on top of the docs' style.css (from w-linux), which keeps every
+ * colour behind a --w-* variable. This file adds what only the web has: its
+ * fonts, a light scheme for readers who ask for one (the offline copy stays on
+ * the W palette — on a machine the Help window paints it with the live theme),
+ * the top navigation and footer, the docs-less page layout, the landing page and
+ * the download card. Everything is scoped under .web. */
+
+@font-face {
+  font-family: "Inter"; font-style: normal; font-weight: 100 900; font-display: swap;
+  src: local("Inter Variable"), url("../fonts/InterVariable.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono"; font-style: normal; font-weight: 100 800; font-display: swap;
+  src: local("JetBrains Mono"), url("../fonts/JetBrainsMono.woff2") format("woff2");
+}
+
+/* The light scheme: theme w's hues on a pale ground. */
+@media (prefers-color-scheme: light) {
+  :root.web {
+    --w-bg: #fbf8fc;
+    --w-surface-dim: #f4eef6;
+    --w-surface: #ebe1ee;
+    --w-surface-variant: #dccde2;
+    --w-text: #3f3545;
+    --w-text-dim: #6b5f72;
+    --w-text-bright: #1a1220;
+    --w-text-faint: #9a8ba1;
+    --w-accent-ink: #7a3f87;
+    --w-primary: #8a4f96;
+    --w-primary-container: #ead6f0;
+    --w-on-primary: #ffffff;
+    --w-vivid: #8e1fa6;
+    --w-green: #4c7838;
+    --w-yellow: #946a1f;
+    --w-cyan: #2c727c;
+    color-scheme: light;
+  }
+  .web ::selection { color: var(--w-text-bright); }
+  .web #hits { box-shadow: 0 16px 40px rgb(60 20 70 / .14); }
+  .web .brand img, .web footer.site img { filter: brightness(.55) saturate(1.4); }
+}
+
+/* ── Top navigation and footer ───────────────────────────────────────────── */
+.web .primary { display: flex; gap: 2px; margin-left: 8px; }
+.web .primary a {
+  padding: 6px 11px; border-radius: var(--w-radius-sm); font-size: 14px; color: var(--w-text-dim);
+}
+.web .primary a:hover { color: var(--w-text-bright); background: var(--w-surface-dim); }
+.web .primary a[aria-current] { color: var(--w-text-bright); background: var(--w-surface); }
+.web .primary a.ext::after, .web footer.site a.ext::after { content: none; }
+.web.home .top .langs { margin-left: auto; }
+/* The top navigation names the docs itself; the brand is just the mark. */
+.web .brand span { display: none; }
+
+.web footer.site {
+  border-top: 1px solid var(--w-surface); padding: 22px 24px 30px; font-size: 14px; color: var(--w-text-dim);
+}
+.web footer.site .row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; max-width: 1180px; margin: 0 auto;
+}
+.web footer.site nav { display: flex; flex-wrap: wrap; gap: 4px 18px; }
+.web footer.site a { color: var(--w-text); }
+.web footer.site a:hover { color: var(--w-text-bright); }
+.web footer.site .ver { margin-left: auto; font-family: var(--w-font-mono); font-size: 13px; }
+.web footer.site p { max-width: 1180px; margin: 10px auto 0; font-size: 13px; color: var(--w-text-faint); }
+
+.web .edit { margin-top: 40px; font-size: 14px; }
+.web .edit a { color: var(--w-text-dim); }
+.web .edit a:hover { color: var(--w-text-bright); }
+
+/* ── Pages without the docs navigation (download, changelog, …) ──────────── */
+.web.solo .side, .web.solo .menu { display: none; }
+.web.solo .frame { grid-template-columns: minmax(0, 1fr) 220px; max-width: 1180px; }
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.web .cta { display: flex; flex-wrap: wrap; gap: 12px; }
+.web .button {
+  display: inline-flex; align-items: center; height: 42px; padding: 0 20px; font-weight: 600;
+  border-radius: var(--w-radius-sm); border: 1px solid var(--w-surface-variant);
+  color: var(--w-text-bright); background: var(--w-surface-dim);
+}
+.web .button:hover { border-color: var(--w-primary); color: var(--w-text-bright); }
+.web .button.primary { background: var(--w-primary); border-color: var(--w-primary); color: var(--w-on-primary); }
+.web .button.primary:hover { background: var(--w-accent-ink); border-color: var(--w-accent-ink); }
+
+/* ── Landing ─────────────────────────────────────────────────────────────── */
+.landing { max-width: 1180px; margin: 0 auto; padding: 0 24px 40px; }
+.landing h2 { font-size: 26px; margin: 72px 0 24px; text-align: center; }
+.hero { padding: 72px 0 0; text-align: center; }
+.hero h1 { font-size: clamp(32px, 5vw, 54px); letter-spacing: -.025em; margin: 0 0 14px; }
+.hero .lead { font-size: clamp(17px, 2vw, 21px); margin: 0 0 30px; color: var(--w-text); }
+.hero .cta { justify-content: center; }
+.hero .banner {
+  display: block; width: 100%; height: auto; margin: 48px auto 0; border-radius: var(--w-radius);
+  border: 1px solid var(--w-surface); box-shadow: 0 30px 80px -30px rgb(120 30 150 / .45);
+}
+
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.tile {
+  display: flex; flex-direction: column; padding: 22px 22px 18px; border-radius: var(--w-radius);
+  background: var(--w-surface-dim); border: 1px solid var(--w-surface); color: var(--w-text);
+  transition: border-color .15s, transform .15s;
+}
+.tile:hover { border-color: var(--w-primary); color: var(--w-text); transform: translateY(-2px); }
+.tile h3 { margin: 0 0 8px; font-size: 18px; }
+.tile p { margin: 0 0 16px; font-size: 15px; flex: 1; }
+.tile .more { font-size: 14px; color: var(--w-accent-ink); }
+
+.steps { list-style: none; padding: 0; margin: 0; counter-reset: step;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.steps li { counter-increment: step; margin: 0; padding: 22px; border-radius: var(--w-radius);
+  border: 1px solid var(--w-surface); position: relative; }
+.steps li::before {
+  content: counter(step); display: grid; place-items: center; width: 32px; height: 32px; margin-bottom: 14px;
+  border-radius: 50%; background: var(--w-primary-container); color: var(--w-text-bright); font-weight: 700;
+}
+.steps h3 { margin: 0 0 6px; font-size: 18px; }
+.steps p { margin: 0 0 12px; }
+.steps pre { margin: 0; }
+
+.shots .strip { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px; }
+.shots img { height: 340px; width: auto; border-radius: var(--w-radius-sm); scroll-snap-align: start;
+  border: 1px solid var(--w-surface); }
+
+/* ── Download card ───────────────────────────────────────────────────────── */
+.iso {
+  padding: 22px 24px; margin: 0 0 28px; border-radius: var(--w-radius);
+  background: var(--w-surface-dim); border: 1px solid var(--w-surface-variant);
+}
+.iso-name { margin: 0 0 10px; font: 600 16px/1.4 var(--w-font-mono); color: var(--w-text-bright); word-break: break-all; }
+.iso dl { display: none; grid-template-columns: max-content 1fr; gap: 2px 18px; margin: 0 0 12px; font-size: 14px; }
+.iso.ready dl { display: grid; }
+.iso dt { color: var(--w-text-dim); }
+.iso dd { margin: 0; color: var(--w-text-bright); }
+.iso-sha { display: block; margin: 0 0 18px; font-size: 12px; color: var(--w-text-dim); word-break: break-all; }
+.iso-sha:empty { display: none; }
+.iso .cta { margin: 0; }
+
+/* ── Narrow windows ──────────────────────────────────────────────────────── */
+@media (max-width: 1180px) {
+  .web.solo .frame { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 960px) {
+  .tiles, .steps { grid-template-columns: minmax(0, 1fr); }
+  .web:not(.home) .primary { display: none; }
+}
+@media (max-width: 560px) {
+  .web.home .primary a:not([aria-current]):nth-child(n+3) { display: none; }
+  .web footer.site .ver { margin-left: 0; }
+}
