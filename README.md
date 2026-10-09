@@ -33,7 +33,7 @@ sub-path, and from disk.
 | `i18n/web.json` | every string of the pages above, per language |
 | `assets/web.css`, `assets/web.js` | light scheme, fonts, landing and download styles; language memory and the download card |
 | `fonts/` | Inter and JetBrains Mono, subset to Latin and Cyrillic |
-| `shots/` | screenshots for the landing page's strip (shown once there are any) |
+| `shots/` | the landing page's screenshots, `NN-key.webp` — `shots/<lang>/` for a localised UI, `shots/` for both; caption `shot.<key>` in `i18n/web.json` |
 
 The download card asks the GitHub API for the current `edge` image in the
 reader's browser: the image is rebuilt every night under a dated name, and the

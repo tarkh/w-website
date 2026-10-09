@@ -101,6 +101,17 @@ def footer(lang, root, url):
             f'<p>{html.escape(t("foot.license", lang))}</p></footer>')
 
 
+def webp_size(path):
+    """Width and height from a WebP header, so the strip lays out before the images load."""
+    b = path.read_bytes()[:30]
+    if b[12:16] == b"VP8 ":
+        return int.from_bytes(b[26:28], "little") & 0x3FFF, int.from_bytes(b[28:30], "little") & 0x3FFF
+    if b[12:16] == b"VP8X":
+        return 1 + int.from_bytes(b[24:27], "little"), 1 + int.from_bytes(b[27:30], "little")
+    n = int.from_bytes(b[21:25], "little")  # VP8L
+    return 1 + (n & 0x3FFF), 1 + (n >> 14 & 0x3FFF)
+
+
 # ── Pages ─────────────────────────────────────────────────────────────────────
 def home(site, lang):
     def anchor(key, sec):
@@ -114,9 +125,19 @@ def home(site, lang):
     steps = "".join(f'<li><h3>{t(f"how.{k}.title", lang)}</h3><p>{t(f"how.{k}.text", lang)}</p>{extra}</li>'
                     for k, extra in (("iso", ""), ("install", ""),
                                      ("update", '<pre><code><span class="w">w-sync</span> update</code></pre>')))
-    shots = sorted(p.name for p in (HERE / "shots").glob("*") if p.suffix in (".webp", ".png", ".jpg"))
-    strip = ("" if not shots else f'<section class="shots"><h2>{t("shots.title", lang)}</h2><div class="strip">'
-             + "".join(f'<img src="../shots/{s}" alt="" loading="lazy">' for s in shots) + "</div></section>")
+    figs = ""  # shots/NN-key.webp for every language, shots/<lang>/ where the UI in it is localised
+    for p in sorted((p for d in ("shots", f"shots/{lang}") for p in (HERE / d).glob("*.webp")), key=lambda p: p.name):
+        src, cap, (w, h) = p.relative_to(HERE).as_posix(), html.escape(t(f"shot.{p.stem[3:]}", lang)), webp_size(p)
+        figs += (f'<figure><a href="../{src}"><img src="../{src}" width="{w}" height="{h}" alt="{cap}" loading="lazy">'
+                 f'</a><figcaption>{cap}</figcaption></figure>')
+    def btn(cls, key, path):
+        return (f'<button class="{cls}" type="button" aria-label="{t(key, lang)}"><svg viewBox="0 0 24 24" aria-hidden="true">'
+                f'<path d="{path}"/></svg></button>')
+
+    box = (f'<dialog class="lightbox"><figure><img alt=""><figcaption></figcaption></figure>'
+           + btn("prev", "shots.prev", "M15 5l-7 7 7 7") + btn("next", "shots.next", "M9 5l7 7-7 7")
+           + btn("close", "shots.close", "M6 6l12 12M18 6L6 18") + "</dialog>")
+    strip = figs and f'<section class="shots"><h2>{t("shots.title", lang)}</h2><div class="grid">{figs}</div>{box}</section>'
     switch = "".join(f"<b>{lg}</b>" if lg == lang else f'<a href="../{lg}/index.html" hreflang="{lg}">{lg}</a>'
                      for lg in LANGS)
     tpl = Template((HERE / "templates/home.html").read_text())
@@ -249,9 +270,9 @@ def main():
     out = Path(sys.argv[1] if len(sys.argv) > 1 else HERE / "out").resolve()
     site = wds.Site("web", chrome)
     for d in ("assets", "fonts", "shots"):
-        for f in sorted((HERE / d).glob("*")):
+        for f in sorted((HERE / d).rglob("*")):
             if f.is_file() and not f.name.startswith("."):
-                site.files[f"{d}/{f.name}"] = f.read_bytes()
+                site.files[f.relative_to(HERE).as_posix()] = f.read_bytes()
     site.files["assets/banner.webp"] = (W_SRC / "banner.webp").read_bytes()
     for lang in LANGS:
         home(site, lang)
