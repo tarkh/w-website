@@ -65,6 +65,8 @@ def t(key, lang):
 def links(lang):
     """W's root documents that are pages of this site."""
     out = {"README.md": ("index.html", "en"), "CHANGELOG.md": ("changelog.html", lang)}
+    out["INSTALL.md"] = ("download.html", lang)
+    out.update({f"docs/{lg}/INSTALL.md": ("download.html", lg) for lg in LANGS[1:]})
     for name in ("CONTRIBUTING", "SECURITY"):
         out[f"{name}.md"] = (f"{name.lower()}.html", "en")
         out.update({f"docs/{lg}/{name}.md": (f"{name.lower()}.html", lg) for lg in LANGS[1:]})
@@ -152,7 +154,8 @@ def home(site, lang):
 
 
 def readme_section(lang, heading):
-    src = "README.md" if lang == "en" else f"docs/{lang}/README.md"
+    src = next(f for f in ("INSTALL.md", "README.md") if (W_SRC / f).is_file())   # README before W v0.25
+    src = src if lang == "en" else f"docs/{lang}/{src}"
     m = re.search(rf"^## {re.escape(heading)}\n(.*?)(?=^## |\Z)", (W_SRC / src).read_text(), re.MULTILINE | re.DOTALL)
     if not m:
         sys.exit(f"build.py: {src} has no section '## {heading}' (i18n/web.json dl.readme)")
@@ -262,7 +265,7 @@ def llms(site):
                     + (f": {p.summary}" if p.summary else "") for p in items]
             out.append("")
     out.append("## Project\n")
-    out += [f"- [{n}]({RAW_URL}/{n})" for n in ("README.md", "CHANGELOG.md", "SECURITY.md", "CONTRIBUTING.md")]
+    out += [f"- [{n}]({RAW_URL}/{n})" for n in ("README.md", "INSTALL.md", "CHANGELOG.md", "SECURITY.md", "CONTRIBUTING.md")]
     site.files["llms.txt"] = ("\n".join(out) + "\n").encode()
 
 
